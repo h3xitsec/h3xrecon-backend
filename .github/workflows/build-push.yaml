@@ -1,0 +1,50 @@
+name: Build and Push PostgreSQL Docker Image
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  
+permissions:
+  packages: write
+  contents: read
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backend repository
+        uses: actions/checkout@v3
+        with:
+          repository: h3xitsec/h3xrecon-backend
+          path: h3xrecon-backend
+          ref: ${{ github.ref }}
+      
+      - name: Get versions from version file
+        id: get_version
+        working-directory: h3xrecon-backend/
+        run: |
+          echo "version=$(cat pgsql/.version)" >> $GITHUB_OUTPUT
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and push database image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./h3xrecon-backend/pgsql
+          file: ./h3xrecon-backend/pgsql/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/h3xrecon_pgsql:v${{ steps.get_version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
