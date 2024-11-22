@@ -37,7 +37,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHA_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build and push h3xrecon_pgsql image
         uses: docker/build-push-action@v4
