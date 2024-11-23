@@ -24,7 +24,7 @@ jobs:
         id: get_version
         working-directory: h3xrecon-backend/
         run: |
-          echo "pgsql_version=$(cat pgsql/.version)\nversion=$(cat .version)" >> $GITHUB_OUTPUT
+          echo "pgsql_version=v$(cat pgsql/.version)\nversion=v$(cat .version)" >> $GITHUB_OUTPUT
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -34,7 +34,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.get_version.outputs.version }}
+          tag_name: v0.0.3
+          files: |
+            h3xrecon-backend/*
           repository: h3xitsec/h3xrecon
       
       - name: Set up QEMU
