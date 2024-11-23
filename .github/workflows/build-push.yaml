@@ -24,7 +24,18 @@ jobs:
         id: get_version
         working-directory: h3xrecon-backend/
         run: |
-          echo "version=$(cat pgsql/.version)" >> $GITHUB_OUTPUT
+          echo "pgsql_version=$(cat pgsql/.version)\nversion=$(cat .version)" >> $GITHUB_OUTPUT
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.7'
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          repository: h3xitsec/h3xrecon
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -45,7 +56,7 @@ jobs:
           context: ./h3xrecon-backend/pgsql
           file: ./h3xrecon-backend/pgsql/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/h3xrecon_pgsql:v${{ steps.get_version.outputs.version }}
+          tags: ghcr.io/${{ github.repository_owner }}/h3xrecon_pgsql:v${{ steps.get_version.outputs.pgsql_version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
